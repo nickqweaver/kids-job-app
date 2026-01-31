@@ -1,344 +1,205 @@
-Welcome to your new TanStack app! 
+# Kids Job App
 
-# Getting Started
+A family chore and allowance tracking application. Parents can assign weekly chores, post one-off jobs, and manage allowances. Kids can view their chores, claim jobs, and track their earnings.
 
-To run this application:
+## Features
+
+**For Parents:**
+- Create and manage kids' accounts
+- Assign recurring weekly chores (with optional day-of-week scheduling)
+- Post one-off jobs for extra earnings (first-come-first-served)
+- Approve/reject completed chores and jobs
+- Give weekly allowance
+- Track balances and record payouts
+- Adjust balances manually
+
+**For Kids:**
+- View weekly chores and mark them complete
+- Browse and claim available jobs
+- Track bank balance and transaction history
+- See earnings from chores, jobs, and allowance
+
+## Tech Stack
+
+- [TanStack Start](https://tanstack.com/start) - Full-stack React framework
+- [TanStack Router](https://tanstack.com/router) - Type-safe routing
+- [Drizzle ORM](https://orm.drizzle.team/) - TypeScript ORM
+- [SQLite](https://www.sqlite.org/) - Database (via better-sqlite3)
+- [Better Auth](https://better-auth.com/) - Authentication
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+- [Shadcn UI](https://ui.shadcn.com/) - UI components
+
+---
+
+## Quick Start (Development)
 
 ```bash
+# Install dependencies
 npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local and set BETTER_AUTH_SECRET (generate with: npx @better-auth/cli secret)
+
+# Push database schema
+npm run db:push
+
+# Start development server
 npm run dev
 ```
 
-# Building For Production
+Visit http://localhost:3000 to access the app.
 
-To build this application for production:
+---
 
-```bash
-npm run build
-```
+## Deployment (Docker)
 
-## Testing
+### Prerequisites
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+- Docker and Docker Compose installed
+- A secret key for authentication
 
-```bash
-npm run test
-```
-
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-
-## Linting & Formatting
-
-
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
+### 1. Clone and Configure
 
 ```bash
-npm run lint
-npm run format
-npm run check
+# Clone the repository
+git clone <your-repo-url>
+cd kids-job-app
+
+# Copy environment template
+cp .env.example .env
+
+# Generate a secret key
+npx @better-auth/cli secret
+# Copy the output and paste it into .env as BETTER_AUTH_SECRET
 ```
 
+### 2. Configure Environment
 
-## Setting up Better Auth
-
-1. Generate and set the `BETTER_AUTH_SECRET` environment variable in your `.env.local`:
-
-   ```bash
-   npx @better-auth/cli secret
-   ```
-
-2. Visit the [Better Auth documentation](https://www.better-auth.com) to unlock the full potential of authentication in your app.
-
-### Adding a Database (Optional)
-
-Better Auth can work in stateless mode, but to persist user data, add a database:
-
-```typescript
-// src/lib/auth.ts
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-
-export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  // ... rest of config
-});
-```
-
-Then run migrations:
+Edit `.env`:
 
 ```bash
-npx @better-auth/cli migrate
+# Port to expose (optional, defaults to 3000)
+PORT=3000
+
+# Your app's public URL
+BETTER_AUTH_URL=http://your-server-ip:3000
+
+# Secret key (required - paste from step 1)
+BETTER_AUTH_SECRET=your-generated-secret-here
 ```
 
-
-## Shadcn
-
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
+### 3. Build and Run
 
 ```bash
-pnpm dlx shadcn@latest add button
+# Build and start the container
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop the container
+docker compose down
 ```
 
+The app will be available at `http://your-server-ip:3000`
 
+### 4. First-Time Setup
 
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
+1. Visit the app in your browser
+2. Click "Sign Up" to create your parent account
+3. Go to "Manage Kids" to add your children
+4. Go to "Manage Chores" to create weekly chores
+5. Kids can access their view at `/kids` (no login required - they just pick their name)
 
-### Adding A Route
+### Data Persistence
 
-To add a new route to your application just add another a new file in the `./src/routes` directory.
+The SQLite database is stored in a Docker volume (`kidsjob_data`). Your data persists across container restarts and updates.
 
-TanStack will automatically generate the content of the route file for you.
+To backup your data:
+```bash
+# Find the volume location
+docker volume inspect kidsjob_data
 
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
+# Or copy the database out of the container
+docker cp kidsjob:/app/data/kidsjob.db ./backup.db
 ```
 
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
+### Updating
 
 ```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
+# Pull latest changes
+git pull
+
+# Rebuild and restart
+docker compose up -d --build
 ```
 
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
+---
 
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+## Reverse Proxy (Optional)
 
-// ...
+If running behind nginx or Traefik, update `BETTER_AUTH_URL` to your domain:
 
-const queryClient = new QueryClient();
+```bash
+BETTER_AUTH_URL=https://chores.yourdomain.com
+```
 
-// ...
+Example nginx config:
+```nginx
+server {
+    listen 443 ssl;
+    server_name chores.yourdomain.com;
 
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
 }
 ```
 
-You can also add TanStack Query Devtools to the root route (optional).
+---
 
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+## Development
 
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from "@tanstack/react-query";
-
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
+### Scripts
 
 ```bash
-npm install @tanstack/store
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run test         # Run tests
+npm run lint         # Lint code
+npm run format       # Format code
+npm run db:push      # Push schema to database
+npm run db:studio    # Open Drizzle Studio (database GUI)
 ```
 
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
+### Project Structure
 
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
+```
+src/
+├── components/      # UI components
+│   └── ui/          # Shadcn UI components
+├── db/
+│   └── schema.ts    # Drizzle database schema
+├── hooks/           # Custom React hooks
+├── lib/             # Utilities and auth config
+├── routes/          # TanStack Router pages
+│   ├── parent/      # Parent portal routes
+│   └── kids/        # Kid portal routes
+└── server/          # Server functions (API)
 ```
 
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
+---
 
-Let's check this out by doubling the count using derived state.
+## License
 
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+MIT
