@@ -1,0 +1,24 @@
+{
+  "projectName": "kids-job-app",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "npm",
+  "tailwind": true,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "sqlite"
+    }
+  },
+  "git": true,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "eslint",
+    "nitro",
+    "start",
+    "drizzle",
+    "form",
+    "better-auth",
+    "shadcn"
+  ]
+}
