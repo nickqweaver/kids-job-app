@@ -229,7 +229,14 @@ function KidChoresPage() {
                         </div>
                       )}
                     </div>
-                    <span className="text-sm font-medium text-red-600">Needs Redo</span>
+                    {canMarkComplete && (
+                      <Button
+                        onClick={() => completeMutation.mutate(chore.id)}
+                        disabled={completeMutation.isLoading}
+                      >
+                        Done!
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
